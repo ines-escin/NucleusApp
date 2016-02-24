@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:gauge="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <pl.pawelkleczkowski.customgauge.CustomGauge
+        android:id="@+id/main_gauge"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp"
+        gauge:endValue="800"
+        gauge:pointEndColor="@color/md_blue_800"
+        gauge:pointStartColor="@color/md_blue_300"
+        gauge:startAngel="135"
+        gauge:startValue="200"
+        gauge:strokeCap="ROUND"
+        gauge:strokeColor="@color/md_grey_400"
+        gauge:strokeWidth="10dp"
+        gauge:sweepAngel="270"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="166dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/gauge_value"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
