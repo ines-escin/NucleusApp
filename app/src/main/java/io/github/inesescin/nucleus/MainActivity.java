@@ -4,20 +4,44 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
-import io.github.inesescin.nucleus.connection.GaugeUpdateAsyncTask;
+import java.io.IOException;
+
+import io.github.inesescin.nucleus.asyncTasks.LevelGaugeAsyncTask;
+import io.github.inesescin.nucleus.connection.FiwareConnection;
+
+import io.github.inesescin.nucleus.models.Nucleus;
 import pl.pawelkleczkowski.customgauge.CustomGauge;
 
 public class MainActivity extends AppCompatActivity {
 
-    private GaugeUpdateAsyncTask gaugeTask;
+    private String nucleusId = "NucleusAlpha";
+    private String siteAddress = "130.206.119.206:1026";
+    private int level;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CustomGauge customGauge = (CustomGauge) findViewById(R.id.main_gauge);
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                TextView gaugeText = (TextView) findViewById(R.id.levelText);
+                CustomGauge levelGauge = (CustomGauge) findViewById (R.id.main_gauge);
+
+                LevelGaugeAsyncTask gaugeAsyncTask = new LevelGaugeAsyncTask(levelGauge, gaugeText);
+
+                gaugeAsyncTask.execute(nucleusId, siteAddress);
+
+            }
+        });
+
     }
 
     @Override

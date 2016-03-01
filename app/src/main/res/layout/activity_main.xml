@@ -11,15 +11,15 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="10dp"
-        gauge:endValue="800"
-        gauge:pointEndColor="@color/md_blue_800"
-        gauge:pointStartColor="@color/md_blue_300"
-        gauge:startAngel="135"
-        gauge:startValue="200"
+        gauge:endValue="100"
+        gauge:pointEndColor="@color/md_green_300"
+        gauge:pointStartColor="@color/md_green_300"
+        gauge:startAngel="90"
+        gauge:startValue="0"
         gauge:strokeCap="ROUND"
         gauge:strokeColor="@color/md_grey_400"
         gauge:strokeWidth="10dp"
-        gauge:sweepAngel="270"
+        gauge:sweepAngel="360"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="166dp" />
@@ -27,8 +27,12 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/gauge_value"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:text="0"
+        android:id="@+id/levelText"
+        android:layout_alignStart="@+id/main_gauge"
+        android:layout_below="@+id/main_gauge"
+        android:layout_alignEnd="@+id/main_gauge"
+        android:gravity="center_horizontal" />
+
 
 </RelativeLayout>
