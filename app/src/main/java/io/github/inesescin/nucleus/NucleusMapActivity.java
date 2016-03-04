@@ -8,9 +8,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import io.github.inesescin.nucleus.asyncTasks.MapMarkingAsyncTask;
+import io.github.inesescin.nucleus.connection.FiwareConnection;
+import io.github.inesescin.nucleus.models.Nucleus;
+
 public class NucleusMapActivity extends FragmentActivity {
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
+    private String nucleusId = "NucleusAlpha";
+    private String siteAddress = "130.206.119.206:1026";
+    private MapMarkingAsyncTask mapMarkingAsyncTask = new MapMarkingAsyncTask(siteAddress);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +70,6 @@ public class NucleusMapActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #map} is not null.
      */
     private void setUpMap() {
-        map.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        mapMarkingAsyncTask.execute(map);
     }
 }

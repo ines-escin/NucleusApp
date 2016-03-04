@@ -1,11 +1,16 @@
 package io.github.inesescin.nucleus.connection;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import io.github.inesescin.nucleus.models.Nucleus;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -38,9 +43,8 @@ public class FiwareConnection {
         String url = "http://" + siteAddress + "/v1/queryContext/";
         String json = "{" + "\"entities\": [" + "{" + "\"type\": \"" + type + "\"," + "\"isPattern\": \"true\"," +  "\"id\": \".*\"" + "}]}";
 
-        return doPostRequest(url,json);
+        return doPostRequest(url, json);
     }
-
 
     public String getAttributePropertyValue(String attributeName, String entityId, String  siteAddress, String property) throws IOException
     {
@@ -86,6 +90,7 @@ public class FiwareConnection {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
+                .addHeader("Accept","application/json")
                 .post(body)
                 .build();
 

@@ -6,61 +6,45 @@ package io.github.inesescin.nucleus.models;
 public class Nucleus {
 
     private String id;
-    private int value;
-    private String latitude;
-    private String longitude;
+    private double value;
+    private String coordinates;
 
-    public Nucleus(String id, int value)
+    public Nucleus(String id, double value)
     {
         this.id = id;
         this.value = value;
     }
 
-    public Nucleus (String id, int value, String latitude, String longitude)
+    public Nucleus (String id, double value, String coordinates)
     {
         this.id = id;
         this.value = value;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.coordinates = coordinates;
     }
 
     public Nucleus(){}
 
-
-    public String getId() {
-        return id;
+    public void setCoordinates(String coordinates)
+    {
+        this.coordinates = coordinates;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
+    public void setValue(double value)
+    {
         this.value = value;
     }
 
-    public String getLatitude() {
-        return latitude;
+    public double getLatitude()
+    {
+        String [] coord = coordinates.split(",");
+        double lat = Double.parseDouble(coord[0]);
+        return lat;
     }
 
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getLongitude() {
+    public double getLongitude()
+    {
+        String [] coord = coordinates.split(",");
+        double longitude = Double.parseDouble(coord[1]);
         return longitude;
     }
-
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
-    }
-
-
-
-
-
 }

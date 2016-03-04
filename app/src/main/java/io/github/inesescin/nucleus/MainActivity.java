@@ -18,10 +18,6 @@ public class MainActivity extends AppCompatActivity {
 
     private String nucleusId = "NucleusAlpha";
     private String siteAddress = "130.206.119.206:1026";
-    private int level;
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
