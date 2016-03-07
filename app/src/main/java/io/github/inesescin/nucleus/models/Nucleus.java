@@ -29,6 +29,21 @@ public class Nucleus {
         this.coordinates = coordinates;
     }
 
+    public double getValue()
+    {
+        return value;
+    }
+
+    public void setId(String id)
+    {
+        this.id = id;
+    }
+
+    public String getId()
+    {
+        return id;
+    }
+
     public void setValue(double value)
     {
         this.value = value;

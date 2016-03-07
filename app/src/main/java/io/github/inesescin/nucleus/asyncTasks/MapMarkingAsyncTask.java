@@ -1,9 +1,11 @@
 package io.github.inesescin.nucleus.asyncTasks;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -14,6 +16,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import io.github.inesescin.nucleus.MainActivity;
+import io.github.inesescin.nucleus.NucleusMapActivity;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
 import io.github.inesescin.nucleus.models.Nucleus;
 
@@ -32,6 +35,7 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
 
     @Override
     protected ArrayList<Nucleus> doInBackground(GoogleMap... params) {
+
         map = params[0];
         FiwareConnection fiwareConnection = new FiwareConnection();
         ArrayList<Nucleus> ecopoints = new ArrayList();
@@ -45,6 +49,7 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
                 Nucleus nucleus = new Nucleus();
                 JSONObject currentEntityResponse = contextResponse.getJSONObject(i);
                 JSONObject contextElement = currentEntityResponse.getJSONObject("contextElement");
+                nucleus.setId(contextElement.getString("id"));
                 JSONArray attributes = contextElement.getJSONArray("attributes");
                 nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
                 nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
@@ -56,15 +61,17 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
         {
             e.printStackTrace();
         }
+        NucleusMapActivity.ecopoints = ecopoints;
         return ecopoints;
     }
 
     @Override
     protected void onPostExecute(ArrayList<Nucleus> ecopoints) {
         super.onPostExecute(ecopoints);
-        for(int i = 0; i < ecopoints.size(); i++)
-        {
-            map.addMarker(new MarkerOptions().position(new LatLng(ecopoints.get(i).getLatitude(),ecopoints.get(i).getLongitude())));
+        
+        for(int i = 0; i < ecopoints.size(); i++) {
+            map.addMarker(new MarkerOptions().title(ecopoints.get(i).getId()).position(new LatLng(ecopoints.get(i).getLatitude(),ecopoints.get(i).getLongitude())));
         }
+
     }
 }

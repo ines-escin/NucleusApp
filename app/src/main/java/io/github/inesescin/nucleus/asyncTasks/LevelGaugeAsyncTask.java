@@ -14,14 +14,14 @@ import pl.pawelkleczkowski.customgauge.CustomGauge;
  */
 public class LevelGaugeAsyncTask extends AsyncTask<String, Void, String> {
 
-    private String level;
-    private CustomGauge customGauge;
-    private TextView textView;
+    private String oilLevel;
+    private CustomGauge oilLevelGauge;
+    private TextView oilLevelText;
 
     public LevelGaugeAsyncTask(CustomGauge customGauge, TextView textView)
     {
-        this.customGauge = customGauge;
-        this.textView = textView;
+        this.oilLevelGauge = customGauge;
+        this.oilLevelText = textView;
     }
 
     @Override
@@ -29,23 +29,23 @@ public class LevelGaugeAsyncTask extends AsyncTask<String, Void, String> {
 
         FiwareConnection fiwareConnection = new FiwareConnection();
 
-        level = "";
+        oilLevel = "";
 
         try {
-            level = fiwareConnection.getAttributePropertyValue("level", params[0], params[1], "value");
+            oilLevel = fiwareConnection.getAttributePropertyValue("level", params[0], params[1], "value");
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
-        return level;
+        return oilLevel;
     }
 
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
 
-        textView.setText(result + " %");
-        customGauge.setValue(Integer.parseInt(result));
+        oilLevelText.setText(result);
+        oilLevelGauge.setValue(Integer.parseInt(result));
     }
 }

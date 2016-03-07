@@ -16,20 +16,33 @@ import pl.pawelkleczkowski.customgauge.CustomGauge;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String nucleusId = "NucleusAlpha";
+    private String nucleusId;
     private String siteAddress = "130.206.119.206:1026";
+    private double value;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Bundle extras = getIntent().getExtras();
+
+        nucleusId = extras.getString("entityId");
+        value = extras.getDouble("value");
+
+        TextView nucleusIdText = (TextView) findViewById(R.id.nucleusId);
+        nucleusIdText.setText(nucleusId);
+
+        final TextView gaugeText = (TextView) findViewById(R.id.levelText);
+        final CustomGauge levelGauge = (CustomGauge) findViewById (R.id.main_gauge);
+
+        gaugeText.setText(String.valueOf((int) value));
+        levelGauge.setValue((int) value);
+
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                TextView gaugeText = (TextView) findViewById(R.id.levelText);
-                CustomGauge levelGauge = (CustomGauge) findViewById (R.id.main_gauge);
 
                 LevelGaugeAsyncTask gaugeAsyncTask = new LevelGaugeAsyncTask(levelGauge, gaugeText);
 
