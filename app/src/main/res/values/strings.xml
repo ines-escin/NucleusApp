@@ -1,7 +1,9 @@
 <resources>
-    <string name="app_name">Nucleus</string>
-
+    <string name="app_name" translatable="false">Nucleus</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_nucleus_map">Nucleus Map</string>
+    <string name="title_activity_intro_animation">IntroAnimationActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

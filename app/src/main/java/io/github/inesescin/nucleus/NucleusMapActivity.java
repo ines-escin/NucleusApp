@@ -1,6 +1,7 @@
 package io.github.inesescin.nucleus;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -14,6 +15,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.github.inesescin.nucleus.asyncTasks.MapMarkingAsyncTask;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
@@ -23,7 +26,6 @@ public class NucleusMapActivity extends FragmentActivity {
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
     private String siteAddress = "130.206.119.206:1026";
-    private MapMarkingAsyncTask mapMarkingAsyncTask = new MapMarkingAsyncTask(siteAddress);
     public static ArrayList<Nucleus> ecopoints;
 
     @Override
@@ -54,7 +56,7 @@ public class NucleusMapActivity extends FragmentActivity {
     }
 
     private void setUpMap() {
-        mapMarkingAsyncTask.execute(map);
+        markMap();
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -72,5 +74,24 @@ public class NucleusMapActivity extends FragmentActivity {
             }
         });
 
+    }
+
+    private void markMap()
+    {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask doAsyncMapMarkingTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        MapMarkingAsyncTask mapMarkingAsyncTask = new MapMarkingAsyncTask(siteAddress);
+                        mapMarkingAsyncTask.execute(map);
+                    }
+                });
+            }
+        };
+        timer.schedule(doAsyncMapMarkingTask, 0, 50000);
     }
 }
