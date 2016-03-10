@@ -1,5 +1,6 @@
 package io.github.inesescin.nucleus;
 
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -7,6 +8,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.github.inesescin.nucleus.asyncTasks.LevelGaugeAsyncTask;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
@@ -34,24 +37,46 @@ public class MainActivity extends AppCompatActivity {
         TextView nucleusIdText = (TextView) findViewById(R.id.nucleusId);
         nucleusIdText.setText(nucleusId);
 
-        final TextView gaugeText = (TextView) findViewById(R.id.levelText);
-        final CustomGauge levelGauge = (CustomGauge) findViewById (R.id.main_gauge);
+        TextView gaugeText = (TextView) findViewById(R.id.levelText);
+        CustomGauge levelGauge = (CustomGauge) findViewById (R.id.main_gauge);
 
         gaugeText.setText(String.valueOf((int) value));
         levelGauge.setValue((int) value);
 
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                LevelGaugeAsyncTask gaugeAsyncTask = new LevelGaugeAsyncTask(levelGauge, gaugeText);
-
-                gaugeAsyncTask.execute(nucleusId, siteAddress);
-
-            }
-        });
+        updateGaugeValue(levelGauge, gaugeText);
+        
+//        MainActivity.this.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                LevelGaugeAsyncTask gaugeAsyncTask = new LevelGaugeAsyncTask(levelGauge, gaugeText);
+//
+//                gaugeAsyncTask.execute(nucleusId, siteAddress);
+//
+//            }
+//        });
 
     }
+
+    private void updateGaugeValue(final CustomGauge gauge, final TextView gaugeText)
+    {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask updateGaugeValue = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        LevelGaugeAsyncTask gaugeAsyncTask = new LevelGaugeAsyncTask(gauge, gaugeText);
+                        gaugeAsyncTask.execute(nucleusId,siteAddress);
+                    }
+                });
+            }
+        };
+        timer.schedule(updateGaugeValue, 0, 30000);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
