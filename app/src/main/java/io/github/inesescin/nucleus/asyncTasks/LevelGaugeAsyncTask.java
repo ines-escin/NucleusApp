@@ -5,7 +5,6 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
-import io.github.inesescin.nucleus.MainActivity;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
 import pl.pawelkleczkowski.customgauge.CustomGauge;
 
@@ -14,7 +13,6 @@ import pl.pawelkleczkowski.customgauge.CustomGauge;
  */
 public class LevelGaugeAsyncTask extends AsyncTask<String, Void, String> {
 
-    private String oilLevel;
     private CustomGauge oilLevelGauge;
     private TextView oilLevelText;
 
@@ -28,11 +26,14 @@ public class LevelGaugeAsyncTask extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... params) {
 
         FiwareConnection fiwareConnection = new FiwareConnection();
+        String entityId = params[0];
+        String siteAddress = params[1];
 
-        oilLevel = "";
+        String oilLevel = "";
 
-        try {
-            oilLevel = fiwareConnection.getAttributePropertyValue("level", params[0], params[1], "value");
+        try
+        {
+            oilLevel = fiwareConnection.getEntityAttributeValue("level", entityId, siteAddress, "value");
         }
         catch (IOException e)
         {
@@ -44,8 +45,10 @@ public class LevelGaugeAsyncTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-
-        oilLevelText.setText(result);
-        oilLevelGauge.setValue(Integer.parseInt(result));
+        if(result != null)
+        {
+            oilLevelText.setText(result);
+            oilLevelGauge.setValue(Integer.parseInt(result));
+        }
     }
 }

@@ -1,6 +1,10 @@
 package io.github.inesescin.nucleus;
 
+import android.content.Context;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -56,11 +60,12 @@ public class NucleusMapActivity extends FragmentActivity {
     }
 
     private void setUpMap() {
+
+        map.setMyLocationEnabled(true);
         markMap();
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra("entityId", marker.getTitle());
                 for (int i = 0; i < ecopoints.size(); i++) {
@@ -73,7 +78,6 @@ public class NucleusMapActivity extends FragmentActivity {
                 return true;
             }
         });
-
     }
 
     private void markMap()

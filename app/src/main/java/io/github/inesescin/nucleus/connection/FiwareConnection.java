@@ -46,7 +46,7 @@ public class FiwareConnection {
         return doPostRequest(url, json);
     }
 
-    public String getAttributePropertyValue(String attributeName, String entityId, String  siteAddress, String property) throws IOException
+    public String getEntityAttributeValue(String attributeName, String entityId, String siteAddress, String property) throws IOException
     {
         String url = "http://" + siteAddress + "/v1/contextEntities/" + entityId + "/attributes/" + attributeName;
         String response = doGetRequest(url);

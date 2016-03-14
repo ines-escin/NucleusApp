@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -38,30 +39,36 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
 
         map = params[0];
         FiwareConnection fiwareConnection = new FiwareConnection();
-        ArrayList<Nucleus> ecopoints = new ArrayList();
+        ArrayList<Nucleus> ecopoints = new ArrayList<>();
         try
         {
-            String stringResponse = fiwareConnection.getEntityByType(siteAddress,"Nucleus");
-            JSONObject response = new JSONObject(stringResponse);
-            JSONArray contextResponse = response.getJSONArray("contextResponses");
-            for(int i = 0; i < contextResponse.length(); i++)
-            {
-                Nucleus nucleus = new Nucleus();
-                JSONObject currentEntityResponse = contextResponse.getJSONObject(i);
-                JSONObject contextElement = currentEntityResponse.getJSONObject("contextElement");
-                nucleus.setId(contextElement.getString("id"));
-                JSONArray attributes = contextElement.getJSONArray("attributes");
-                nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
-                nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
-                ecopoints.add(nucleus);
-            }
-
+            String stringResponse = fiwareConnection.getEntityByType(siteAddress, "Nucleus");
+            ecopoints = parseJsonToNucleusArray(ecopoints, stringResponse);
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
+
         NucleusMapActivity.ecopoints = ecopoints;
+        return ecopoints;
+    }
+
+    private ArrayList<Nucleus> parseJsonToNucleusArray(ArrayList<Nucleus> ecopoints, String stringResponse) throws JSONException
+    {
+        JSONObject response = new JSONObject(stringResponse);
+        JSONArray contextResponse = response.getJSONArray("contextResponses");
+        for(int i = 0; i < contextResponse.length(); i++)
+        {
+            Nucleus nucleus = new Nucleus();
+            JSONObject currentEntityResponse = contextResponse.getJSONObject(i);
+            JSONObject contextElement = currentEntityResponse.getJSONObject("contextElement");
+            nucleus.setId(contextElement.getString("id"));
+            JSONArray attributes = contextElement.getJSONArray("attributes");
+            nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
+            nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
+            ecopoints.add(nucleus);
+        }
         return ecopoints;
     }
 

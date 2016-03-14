@@ -44,17 +44,6 @@ public class MainActivity extends AppCompatActivity {
         levelGauge.setValue((int) value);
 
         updateGaugeValue(levelGauge, gaugeText);
-        
-//        MainActivity.this.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                LevelGaugeAsyncTask gaugeAsyncTask = new LevelGaugeAsyncTask(levelGauge, gaugeText);
-//
-//                gaugeAsyncTask.execute(nucleusId, siteAddress);
-//
-//            }
-//        });
 
     }
 
