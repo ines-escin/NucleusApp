@@ -45,7 +45,7 @@ public class LevelGaugeAsyncTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        if(result != null)
+        if(result != null && !result.equals(""))
         {
             oilLevelText.setText(result);
             oilLevelGauge.setValue(Integer.parseInt(result));
