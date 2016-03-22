@@ -82,6 +82,5 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
                 map.addMarker(new MarkerOptions().title(ecopoints.get(i).getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_green_48dp)).position(new LatLng(ecopoints.get(i).getLatitude(), ecopoints.get(i).getLongitude())));
             }
         }
-
     }
 }

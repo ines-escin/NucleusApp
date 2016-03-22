@@ -8,6 +8,7 @@ import android.location.LocationManager;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -66,15 +67,13 @@ public class NucleusMapActivity extends FragmentActivity {
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.putExtra("entityId", marker.getTitle());
                 for (int i = 0; i < ecopoints.size(); i++) {
                     if (ecopoints.get(i).getId().equals(marker.getTitle())) {
-                        intent.putExtra("value", ecopoints.get(i).getValue());
+                        Toast.makeText(NucleusMapActivity.this, ("Level: " + ecopoints + " %"), Toast.LENGTH_SHORT).show();
                         i = ecopoints.size();
                     }
                 }
-                startActivity(intent);
+
                 return true;
             }
         });
