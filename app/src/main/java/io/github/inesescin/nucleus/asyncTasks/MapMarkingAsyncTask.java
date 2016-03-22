@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 
 import io.github.inesescin.nucleus.MainActivity;
 import io.github.inesescin.nucleus.NucleusMapActivity;
+import io.github.inesescin.nucleus.R;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
 import io.github.inesescin.nucleus.models.Nucleus;
 
@@ -29,8 +31,7 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
     private String siteAddress;
     private GoogleMap map;
 
-    public MapMarkingAsyncTask(String siteAddress)
-    {
+    public MapMarkingAsyncTask(String siteAddress) {
         this.siteAddress = siteAddress;
     }
 
@@ -40,13 +41,10 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
         map = params[0];
         FiwareConnection fiwareConnection = new FiwareConnection();
         ArrayList<Nucleus> ecopoints = new ArrayList<>();
-        try
-        {
+        try {
             String stringResponse = fiwareConnection.getEntityByType(siteAddress, "Nucleus");
             ecopoints = parseJsonToNucleusArray(ecopoints, stringResponse);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -54,12 +52,10 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
         return ecopoints;
     }
 
-    private ArrayList<Nucleus> parseJsonToNucleusArray(ArrayList<Nucleus> ecopoints, String stringResponse) throws JSONException
-    {
+    private ArrayList<Nucleus> parseJsonToNucleusArray(ArrayList<Nucleus> ecopoints, String stringResponse) throws JSONException {
         JSONObject response = new JSONObject(stringResponse);
         JSONArray contextResponse = response.getJSONArray("contextResponses");
-        for(int i = 0; i < contextResponse.length(); i++)
-        {
+        for (int i = 0; i < contextResponse.length(); i++) {
             Nucleus nucleus = new Nucleus();
             JSONObject currentEntityResponse = contextResponse.getJSONObject(i);
             JSONObject contextElement = currentEntityResponse.getJSONObject("contextElement");
@@ -75,9 +71,16 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void, ArrayList<Nu
     @Override
     protected void onPostExecute(ArrayList<Nucleus> ecopoints) {
         super.onPostExecute(ecopoints);
-        
-        for(int i = 0; i < ecopoints.size(); i++) {
-            map.addMarker(new MarkerOptions().title(ecopoints.get(i).getId()).position(new LatLng(ecopoints.get(i).getLatitude(),ecopoints.get(i).getLongitude())));
+
+        for (int i = 0; i < ecopoints.size(); i++) {
+            double level = ecopoints.get(i).getValue();
+            if (level > 70) {
+                map.addMarker(new MarkerOptions().title(ecopoints.get(i).getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_red_48dp)).position(new LatLng(ecopoints.get(i).getLatitude(), ecopoints.get(i).getLongitude())));
+            } else if (level >= 50) {
+                map.addMarker(new MarkerOptions().title(ecopoints.get(i).getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_yellow_48dp)).position(new LatLng(ecopoints.get(i).getLatitude(), ecopoints.get(i).getLongitude())));
+            } else {
+                map.addMarker(new MarkerOptions().title(ecopoints.get(i).getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_green_48dp)).position(new LatLng(ecopoints.get(i).getLatitude(), ecopoints.get(i).getLongitude())));
+            }
         }
 
     }
