@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:gauge="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <pl.pawelkleczkowski.customgauge.CustomGauge
+        android:id="@+id/main_gauge"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp"
+        gauge:endValue="100"
+        gauge:pointEndColor="@color/md_green_300"
+        gauge:pointStartColor="@color/md_green_300"
+        gauge:startAngel="90"
+        gauge:startValue="0"
+        gauge:strokeCap="ROUND"
+        gauge:strokeColor="@color/md_grey_400"
+        gauge:strokeWidth="10dp"
+        gauge:sweepAngel="360"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="166dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:id="@+id/levelText"
+        android:gravity="center_horizontal"
+        android:textSize="100dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="50dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/nucleusId"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="77dp"
+        android:textSize="40dp" />
+
+
+</RelativeLayout>
