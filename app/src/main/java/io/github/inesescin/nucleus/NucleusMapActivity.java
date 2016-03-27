@@ -1,71 +1,69 @@
 package io.github.inesescin.nucleus;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
-import android.widget.Toast;
 
 import com.akexorcist.googledirection.DirectionCallback;
 import com.akexorcist.googledirection.GoogleDirection;
 import com.akexorcist.googledirection.constant.TransportMode;
 import com.akexorcist.googledirection.model.Direction;
 import com.akexorcist.googledirection.util.DirectionConverter;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import io.github.inesescin.nucleus.asyncTasks.MapMarkingAsyncTask;
-import io.github.inesescin.nucleus.connection.FiwareConnection;
 import io.github.inesescin.nucleus.models.Nucleus;
 
-public class NucleusMapActivity extends FragmentActivity implements DirectionCallback {
+public class NucleusMapActivity extends FragmentActivity implements DirectionCallback, OnMapReadyCallback {
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
     private String siteAddress = "130.206.119.206:1026";
     public static Map<String, Nucleus> ecopoints;
     public List<Nucleus> selectedMarkers;
     private Polyline directionPolyline;
+    private boolean requestedRoute;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nucleus_map);
         setActivityEnvironment();
-        setUpMapIfNeeded();
         selectedMarkers = new ArrayList<>();
     }
 
     private void setActivityEnvironment() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Carregando rota", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                requestDirection();
+                if(map==null || ecopoints==null) return;
+                if(requestedRoute){
+                    fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_local_shipping_white_48dp));
+                    if(directionPolyline!=null) directionPolyline.remove();
+                }else{
+                    Snackbar.make(view, "Carregando rota...", Snackbar.LENGTH_LONG).show();
+                    requestDirection();
+                    fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_close_white_48dp));
+                }
+                requestedRoute = !requestedRoute;
             }
         });
     }
@@ -73,21 +71,18 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     @Override
     protected void onResume() {
         super.onResume();
-        setUpMapIfNeeded();
+        getGoogleMapAsync();
     }
 
 
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (map == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            // Check if we were successful in obtaining the map.
-            if (map != null) {
-                setUpMap();
-            }
-        }
+    private void getGoogleMapAsync() {
+        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        setUpMap();
     }
 
     private void setUpMap() {
@@ -111,8 +106,8 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     }
 
     public void requestDirection() {
-        LatLng origin = new LatLng(-8.0520081,-34.9477178);
-        LatLng destination =  new LatLng(-8.0522683,-34.9480723);
+        LatLng origin = new LatLng(-8.052005, -34.946925);
+        LatLng destination =  new LatLng(-8.052276, -34.946933);
         List<LatLng> waypoints = new ArrayList<>();
         for (Map.Entry<String, Nucleus> entry : ecopoints.entrySet()){
             Nucleus nucleus = entry.getValue();
@@ -163,4 +158,6 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
         };
         timer.schedule(doAsyncMapMarkingTask, 0, 50000);
     }
+
+
 }

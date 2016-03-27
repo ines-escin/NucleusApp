@@ -43,14 +43,11 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void,  Map<String,
         map = params[0];
         FiwareConnection fiwareConnection = new FiwareConnection();
         Map<String, Nucleus> ecopoints = new HashMap<>();
-        try
-        {
+        try{
             String stringResponse = fiwareConnection.getEntityByType(siteAddress, "Nucleus");
             ecopoints = parseJsonToNucleusArray(ecopoints, stringResponse);
         }
-        catch(Exception e)
-        {
-            e.printStackTrace();
+        catch(Exception e){
         }
 
         NucleusMapActivity.ecopoints = ecopoints;
