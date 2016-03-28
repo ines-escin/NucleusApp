@@ -6,6 +6,7 @@ import android.widget.TextView;
 import java.io.IOException;
 
 import io.github.inesescin.nucleus.connection.FiwareConnection;
+import io.github.inesescin.nucleus.util.Constants;
 import pl.pawelkleczkowski.customgauge.CustomGauge;
 
 /**
@@ -27,13 +28,12 @@ public class LevelGaugeAsyncTask extends AsyncTask<String, Void, String> {
 
         FiwareConnection fiwareConnection = new FiwareConnection();
         String entityId = params[0];
-        String siteAddress = params[1];
 
         String oilLevel = "";
 
         try
         {
-            oilLevel = fiwareConnection.getEntityAttributeValue("level", entityId, siteAddress, "value");
+            oilLevel = fiwareConnection.getEntityAttributeValue("level", entityId, Constants.FIWARE_ADDRESS, "value");
         }
         catch (IOException e)
         {
