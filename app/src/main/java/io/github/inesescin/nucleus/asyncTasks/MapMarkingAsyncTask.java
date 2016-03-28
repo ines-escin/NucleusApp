@@ -1,57 +1,43 @@
 package io.github.inesescin.nucleus.asyncTasks;
 
-import android.content.Intent;
 import android.os.AsyncTask;
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import static java.util.Map.Entry;
 
-import io.github.inesescin.nucleus.MainActivity;
-import io.github.inesescin.nucleus.NucleusMapActivity;
-import io.github.inesescin.nucleus.R;
+import io.github.inesescin.nucleus.callback.EcopointsCallback;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
 import io.github.inesescin.nucleus.models.Nucleus;
+import io.github.inesescin.nucleus.util.Constants;
 
 /**
  * Created by danielmaida on 03/03/16.
  */
-public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void,  Map<String, Nucleus>> {
+public class MapMarkingAsyncTask extends AsyncTask<Void, Void,  Map<String, Nucleus>> {
 
-    private String siteAddress;
-    private GoogleMap map;
+    private EcopointsCallback callback;
 
-    public MapMarkingAsyncTask(String siteAddress) {
-        this.siteAddress = siteAddress;
+    public MapMarkingAsyncTask(EcopointsCallback callback) {
+        this.callback = callback;
     }
 
     @Override
-    protected Map<String, Nucleus>  doInBackground(GoogleMap... params) {
+    protected Map<String, Nucleus>  doInBackground(Void... params) {
 
-        map = params[0];
         FiwareConnection fiwareConnection = new FiwareConnection();
         Map<String, Nucleus> ecopoints = new HashMap<>();
         try{
-            String stringResponse = fiwareConnection.getEntityByType(siteAddress, "Nucleus");
+            String stringResponse = fiwareConnection.getEntityByType(Constants.FIWARE_ADDRESS, "Nucleus");
             ecopoints = parseJsonToNucleusArray(ecopoints, stringResponse);
         }
         catch(Exception e){
+            e.printStackTrace();
         }
 
-        NucleusMapActivity.ecopoints = ecopoints;
         return ecopoints;
     }
 
@@ -75,16 +61,8 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void,  Map<String,
     @Override
     protected void onPostExecute(Map<String, Nucleus>  ecopoints) {
         super.onPostExecute(ecopoints);
-        for (Entry<String, Nucleus> entry : ecopoints.entrySet()){
-            Nucleus nucleus = entry.getValue();
-            double level = nucleus.getValue();
-            if (level > 70) {
-                map.addMarker(new MarkerOptions().title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_red_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude())));
-            } else if (level >= 50) {
-                map.addMarker(new MarkerOptions().title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_yellow_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude())));
-            } else {
-                map.addMarker(new MarkerOptions().title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_green_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude())));
-            }            
+        if(callback!=null) {
+            callback.onEcopointsReceived(ecopoints);
         }
     }
 }

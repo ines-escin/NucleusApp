@@ -20,7 +20,6 @@ import pl.pawelkleczkowski.customgauge.CustomGauge;
 public class MainActivity extends AppCompatActivity {
 
     private String nucleusId;
-    private String siteAddress = "130.206.119.206:1026";
     private double value;
 
 
@@ -58,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         LevelGaugeAsyncTask gaugeAsyncTask = new LevelGaugeAsyncTask(gauge, gaugeText);
-                        gaugeAsyncTask.execute(nucleusId,siteAddress);
+                        gaugeAsyncTask.execute(nucleusId);
                     }
                 });
             }

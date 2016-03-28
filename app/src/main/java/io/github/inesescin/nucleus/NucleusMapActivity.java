@@ -30,14 +30,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import io.github.inesescin.nucleus.asyncTasks.MapMarkingAsyncTask;
+import io.github.inesescin.nucleus.callback.EcopointsCallback;
 import io.github.inesescin.nucleus.models.Nucleus;
+import io.github.inesescin.nucleus.util.Constants;
+import io.github.inesescin.nucleus.util.MapUtil;
 
-public class NucleusMapActivity extends FragmentActivity implements DirectionCallback, OnMapReadyCallback {
+public class NucleusMapActivity extends FragmentActivity implements DirectionCallback, OnMapReadyCallback, EcopointsCallback {
 
-    private GoogleMap map; // Might be null if Google Play services APK is not available.
-    private String siteAddress = "130.206.119.206:1026";
-    public static Map<String, Nucleus> ecopoints;
-    public List<Nucleus> selectedMarkers;
+    private GoogleMap googleMap; // Might be null if Google Play services APK is not available.
+    private Map<String, Nucleus> ecopoints;
+    private  List<Nucleus> selectedMarkers;
     private Polyline directionPolyline;
     private boolean requestedRoute;
 
@@ -54,7 +56,7 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(map==null || ecopoints==null) return;
+                if(googleMap ==null || ecopoints==null) return;
                 if(requestedRoute){
                     fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_local_shipping_white_48dp));
                     if(directionPolyline!=null) directionPolyline.remove();
@@ -81,16 +83,16 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
+        this.googleMap = googleMap;
         setUpMap();
     }
 
     private void setUpMap() {
 
-        map.setMyLocationEnabled(true);
+        googleMap.setMyLocationEnabled(true);
         markMap();
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-8.0524376,-34.9511914), 15.2f));
-        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MapUtil.CENTER_POINT, MapUtil.ZOOM));
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
 
@@ -106,23 +108,22 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     }
 
     public void requestDirection() {
-        LatLng origin = new LatLng(-8.052005, -34.946925);
-        LatLng destination =  new LatLng(-8.052276, -34.946933);
-        List<LatLng> waypoints = new ArrayList<>();
-        for (Map.Entry<String, Nucleus> entry : ecopoints.entrySet()){
-            Nucleus nucleus = entry.getValue();
-            if(nucleus.getValue()>=50){
-                waypoints.add(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));
+        if(ecopoints!=null && !ecopoints.isEmpty()){
+            List<LatLng> waypoints = new ArrayList<>();
+            for (Map.Entry<String, Nucleus> entry : ecopoints.entrySet()){
+                Nucleus nucleus = entry.getValue();
+                if(nucleus.getValue()>=50){
+                    waypoints.add(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));
+                }
             }
+            GoogleDirection.withServerKey("AIzaSyCRGiz73nymFibyZay9tXk0RugdOPj12VY")
+                    .from(MapUtil.ORIGIN_POINT)
+                    .to(MapUtil.DESTINATION_POINT)
+                    .transportMode(TransportMode.DRIVING)
+                    .waypoints(waypoints)
+                    .optimizeWaypoints(true)
+                    .execute(this);
         }
-
-        GoogleDirection.withServerKey("AIzaSyCRGiz73nymFibyZay9tXk0RugdOPj12VY")
-                .from(origin)
-                .to(destination)
-                .transportMode(TransportMode.DRIVING)
-                .waypoints(waypoints)
-                .optimizeWaypoints(true)
-                .execute(this);
     }
 
 
@@ -131,7 +132,7 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     public void onDirectionSuccess(Direction direction, String rawBody) {
         if (direction.isOK()) {
             List<LatLng> directionPositionList = direction.getRouteList().get(0).getOverviewPolyline().getPointList();
-            directionPolyline = map.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 5, Color.RED));
+            directionPolyline = googleMap.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 5, Color.RED));
         }
     }
     @Override
@@ -150,12 +151,20 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        MapMarkingAsyncTask mapMarkingAsyncTask = new MapMarkingAsyncTask(siteAddress);
-                        mapMarkingAsyncTask.execute(map);
+                        MapMarkingAsyncTask mapMarkingAsyncTask = new MapMarkingAsyncTask(NucleusMapActivity.this);
+                        mapMarkingAsyncTask.execute();
                     }
                 });
             }
         };
-        timer.schedule(doAsyncMapMarkingTask, 0, 50000);
+        timer.schedule(doAsyncMapMarkingTask, 0, Constants.ECOPOINTS_REQUEST_SCHEDULE_TIME);
+    }
+
+    @Override
+    public void onEcopointsReceived(Map<String, Nucleus> ecopoints) {
+        if(ecopoints!=null && !ecopoints.isEmpty()){
+            this.ecopoints = ecopoints;
+            MapUtil.drawEcopointMarkers(ecopoints, googleMap);
+        }
     }
 }
