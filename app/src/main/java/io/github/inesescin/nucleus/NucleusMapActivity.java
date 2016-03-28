@@ -158,6 +158,4 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
         };
         timer.schedule(doAsyncMapMarkingTask, 0, 50000);
     }
-
-
 }

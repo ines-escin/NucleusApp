@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -21,6 +22,7 @@ import static java.util.Map.Entry;
 
 import io.github.inesescin.nucleus.MainActivity;
 import io.github.inesescin.nucleus.NucleusMapActivity;
+import io.github.inesescin.nucleus.R;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
 import io.github.inesescin.nucleus.models.Nucleus;
 
@@ -32,8 +34,7 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void,  Map<String,
     private String siteAddress;
     private GoogleMap map;
 
-    public MapMarkingAsyncTask(String siteAddress)
-    {
+    public MapMarkingAsyncTask(String siteAddress) {
         this.siteAddress = siteAddress;
     }
 
@@ -58,8 +59,7 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void,  Map<String,
     {
         JSONObject response = new JSONObject(stringResponse);
         JSONArray contextResponse = response.getJSONArray("contextResponses");
-        for(int i = 0; i < contextResponse.length(); i++)
-        {
+        for (int i = 0; i < contextResponse.length(); i++) {
             Nucleus nucleus = new Nucleus();
             JSONObject currentEntityResponse = contextResponse.getJSONObject(i);
             JSONObject contextElement = currentEntityResponse.getJSONObject("contextElement");
@@ -77,7 +77,14 @@ public class MapMarkingAsyncTask extends AsyncTask<GoogleMap, Void,  Map<String,
         super.onPostExecute(ecopoints);
         for (Entry<String, Nucleus> entry : ecopoints.entrySet()){
             Nucleus nucleus = entry.getValue();
-            map.addMarker(new MarkerOptions().title(nucleus.getId()).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude())));
+            double level = nucleus.getValue();
+            if (level > 70) {
+                map.addMarker(new MarkerOptions().title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_red_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude())));
+            } else if (level >= 50) {
+                map.addMarker(new MarkerOptions().title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_yellow_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude())));
+            } else {
+                map.addMarker(new MarkerOptions().title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_green_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude())));
+            }            
         }
     }
 }
