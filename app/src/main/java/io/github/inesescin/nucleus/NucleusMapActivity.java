@@ -37,6 +37,7 @@ import io.github.inesescin.nucleus.callback.EcopointsCallback;
 import io.github.inesescin.nucleus.models.Nucleus;
 import io.github.inesescin.nucleus.util.Constants;
 import io.github.inesescin.nucleus.util.MapUtil;
+import io.github.inesescin.nucleus.util.PermissionRequest;
 
 public class NucleusMapActivity extends FragmentActivity implements DirectionCallback, OnMapReadyCallback, EcopointsCallback {
 
@@ -91,7 +92,13 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     }
 
     private void setUpMap() {
-        googleMap.setMyLocationEnabled(true);
+
+        if(PermissionRequest.checkLocationPermission(this)){
+            googleMap.setMyLocationEnabled(true);
+        }else{
+            PermissionRequest.requestLocationPermission(this);
+        }
+
         markMap();
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MapUtil.CENTER_POINT, MapUtil.ZOOM));
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
