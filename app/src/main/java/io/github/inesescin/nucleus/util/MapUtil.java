@@ -1,10 +1,15 @@
 package io.github.inesescin.nucleus.util;
 
+import android.content.Intent;
+import android.net.Uri;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import io.github.inesescin.nucleus.R;
@@ -32,6 +37,34 @@ public class MapUtil {
                 googleMap.addMarker(new MarkerOptions().title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_green_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude())));
             }
         }
+    }
+
+    public static String getNativeGoogleMapsURL(LatLng origin, LatLng destination, List<LatLng> waypoints, List<Integer> waypointsOrder){
+        String URL = "http://maps.google.com/maps?" +
+                    "saddr=" + origin.latitude + "," + origin.longitude +
+                    "&daddr=" + waypointsToString(getOrderedPoints(waypoints, waypointsOrder)) +
+                    "+to:" + destination.latitude + "," + destination.longitude;
+        return URL;
+    }
+
+    private static String waypointsToString(List<LatLng> waypoints){
+        if (waypoints != null && !waypoints.isEmpty()) {
+            String string = waypoints.get(0).latitude + "," + waypoints.get(0).longitude;
+            for (int i = 1; i < waypoints.size(); i++) {
+                string += "+to:" + waypoints.get(i).latitude + "," + waypoints.get(i).longitude;
+            }
+            return string;
+        }
+        return null;
+    }
+
+    private static List<LatLng> getOrderedPoints(List<LatLng> points, List<Integer> pointOrder){
+        List<LatLng> orderedWaypoints = new ArrayList<>();
+        for (int i = 0; i < pointOrder.size(); i++) {
+            int order = pointOrder.get(i);
+            orderedWaypoints.add(points.get(order));
+        }
+        return orderedWaypoints;
     }
 
 }

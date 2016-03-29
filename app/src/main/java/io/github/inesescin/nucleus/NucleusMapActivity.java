@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -46,6 +47,7 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     private List<Nucleus> selectedMarkers;
     private Polyline directionPolyline;
     private boolean requestedRoute;
+    List<LatLng> selectedEcopointsLatLng = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,18 +120,18 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
 
     public void requestDirection() {
         if(ecopoints!=null && !ecopoints.isEmpty()){
-            List<LatLng> waypoints = new ArrayList<>();
+            selectedEcopointsLatLng = new ArrayList<>();
             for (Map.Entry<String, Nucleus> entry : ecopoints.entrySet()){
                 Nucleus nucleus = entry.getValue();
                 if(nucleus.getValue()>=50){
-                    waypoints.add(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));
+                    selectedEcopointsLatLng.add(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));
                 }
             }
             GoogleDirection.withServerKey("AIzaSyCRGiz73nymFibyZay9tXk0RugdOPj12VY")
                     .from(MapUtil.ORIGIN_POINT)
                     .to(MapUtil.DESTINATION_POINT)
                     .transportMode(TransportMode.DRIVING)
-                    .waypoints(waypoints)
+                    .waypoints(selectedEcopointsLatLng)
                     .optimizeWaypoints(true)
                     .execute(this);
         }
@@ -141,12 +143,21 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     public void onDirectionSuccess(Direction direction, String rawBody) {
         if (direction.isOK()) {
             List<LatLng> directionPositionList = direction.getRouteList().get(0).getOverviewPolyline().getPointList();
+            List<Integer> directionPositionOrder = direction.getRouteList().get(0).getWaypointOrder();
             directionPolyline = googleMap.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 5, Color.RED));
+
+            redirectToNativeGoogleMaps(directionPositionOrder);
         }
     }
     @Override
     public void onDirectionFailure(Throwable t) {
 
+    }
+
+    public void redirectToNativeGoogleMaps(List<Integer> pointOrder){
+        Intent navigation = new Intent(Intent.ACTION_VIEW, Uri
+                .parse(MapUtil.getNativeGoogleMapsURL(MapUtil.ORIGIN_POINT, MapUtil.DESTINATION_POINT, selectedEcopointsLatLng,pointOrder)));
+        startActivity(navigation);
     }
 
 
