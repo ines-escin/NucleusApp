@@ -15,6 +15,7 @@ import io.github.inesescin.nucleus.asyncTasks.LevelGaugeAsyncTask;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
 
 import io.github.inesescin.nucleus.models.Nucleus;
+import io.github.inesescin.nucleus.util.Constants;
 import pl.pawelkleczkowski.customgauge.CustomGauge;
 
 public class MainActivity extends AppCompatActivity {
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         };
-        timer.schedule(updateGaugeValue, 0, 30000);
+        timer.schedule(updateGaugeValue, 0, Constants.ECOPOINTS_REQUEST_SCHEDULE_TIME);
     }
 
 

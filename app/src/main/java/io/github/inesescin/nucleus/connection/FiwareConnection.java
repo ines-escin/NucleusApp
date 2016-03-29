@@ -70,19 +70,15 @@ public class FiwareConnection {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Accept", "application/json")
+                .addHeader("Connection", "close")
                 .build();
 
         Response response;
-        int requestAttempts = 0;
+        response = client.newCall(request).execute();
 
-        do
-        {
-            response = client.newCall(request).execute();
-            requestAttempts++;
-        }
-        while(response.code() != 200 || requestAttempts < 5);
-
-        return response.body().string();
+        String responseString = response.body().string();
+        response.body().close();
+        return responseString;
     }
 
     private String doPostRequest(String url, String json) throws IOException
@@ -90,21 +86,19 @@ public class FiwareConnection {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Accept","application/json")
+                .addHeader("Accept", "application/json")
+                .addHeader("Connection", "close")
                 .post(body)
                 .build();
 
         Response response;
-        int requestAttempts = 0;
 
-        do
-        {
-            response = client.newCall(request).execute();
-            requestAttempts++;
-        }
-        while(response.code() != 200 || requestAttempts < 5);
+        response = client.newCall(request).execute();
 
-        return response.body().string();
+
+        String responseString = response.body().string();
+        response.body().close();
+        return responseString;
     }
 
 

@@ -1,10 +1,13 @@
 package io.github.inesescin.nucleus;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -39,7 +42,7 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
 
     private GoogleMap googleMap; // Might be null if Google Play services APK is not available.
     private Map<String, Nucleus> ecopoints;
-    private  List<Nucleus> selectedMarkers;
+    private List<Nucleus> selectedMarkers;
     private Polyline directionPolyline;
     private boolean requestedRoute;
 
@@ -56,11 +59,11 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(googleMap ==null || ecopoints==null) return;
-                if(requestedRoute){
+                if (googleMap == null || ecopoints == null) return;
+                if (requestedRoute) {
                     fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_local_shipping_white_48dp));
-                    if(directionPolyline!=null) directionPolyline.remove();
-                }else{
+                    if (directionPolyline != null) directionPolyline.remove();
+                } else {
                     Snackbar.make(view, "Carregando rota...", Snackbar.LENGTH_LONG).show();
                     requestDirection();
                     fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_close_white_48dp));
@@ -88,7 +91,6 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     }
 
     private void setUpMap() {
-
         googleMap.setMyLocationEnabled(true);
         markMap();
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MapUtil.CENTER_POINT, MapUtil.ZOOM));
