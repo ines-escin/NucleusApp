@@ -1,14 +1,11 @@
 package io.github.inesescin.nucleus;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -46,8 +43,13 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     private Map<String, Nucleus> ecopoints;
     private List<Nucleus> selectedMarkers;
     private Polyline directionPolyline;
-    private boolean requestedRoute;
-    List<LatLng> selectedEcopointsLatLng = new ArrayList<>();
+    private boolean isRequestingRoute;
+    private boolean isSelectingEntry;
+    private List<LatLng> selectedEcopointsLatLng = new ArrayList<>();
+    private LatLng entryPoint;
+    private List<Marker> ecopointMarkers;
+    private List<Marker> entryMarkers;
+    private Snackbar snackBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,15 +65,27 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
             @Override
             public void onClick(View view) {
                 if (googleMap == null || ecopoints == null) return;
-                if (requestedRoute) {
+
+                if (isRequestingRoute) {
+                    //Here we cancel and let it all default
                     fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_local_shipping_white_48dp));
-                    if (directionPolyline != null) directionPolyline.remove();
+                    MapUtil.removeMapMarkers(entryMarkers);
+                    MapUtil.removePolyline(directionPolyline);
+                    MapUtil.setMapMarkersVisible(ecopointMarkers, true);
+                    isRequestingRoute = false;
+                    isSelectingEntry = false;
+                    snackBar.dismiss();
                 } else {
-                    Snackbar.make(view, "Carregando rota...", Snackbar.LENGTH_LONG).show();
-                    requestDirection();
+                    isRequestingRoute = true;
+                    //Let the user choose the entry point
                     fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_close_white_48dp));
+                    MapUtil.setMapMarkersVisible(ecopointMarkers, false);
+                    entryMarkers = MapUtil.drawEntryMarkers(googleMap);
+                    isSelectingEntry = true;
+                    snackBar = Snackbar.make(view, "Escolha por onde entrar na UFPE", Snackbar.LENGTH_INDEFINITE);
+                    snackBar.show();
                 }
-                requestedRoute = !requestedRoute;
+
             }
         });
     }
@@ -106,19 +120,23 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-
-                String id = marker.getTitle();
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.putExtra("entityId", marker.getTitle());
-                intent.putExtra("value", ecopoints.get(id).getValue());
-                startActivity(intent);
-
+                if(isSelectingEntry){
+                    int id = Integer.parseInt(marker.getTitle());
+                    entryPoint = MapUtil.ENTRY_POINTS[id];
+                    requestDirection(entryPoint);
+                }else{
+                    String id = marker.getTitle();
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.putExtra("entityId", marker.getTitle());
+                    intent.putExtra("value", ecopoints.get(id).getValue());
+                    startActivity(intent);
+                }
                 return true;
             }
         });
     }
 
-    public void requestDirection() {
+    public void requestDirection(LatLng entryPoint) {
         if(ecopoints!=null && !ecopoints.isEmpty()){
             selectedEcopointsLatLng = new ArrayList<>();
             for (Map.Entry<String, Nucleus> entry : ecopoints.entrySet()){
@@ -128,13 +146,17 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
                 }
             }
             GoogleDirection.withServerKey("AIzaSyCRGiz73nymFibyZay9tXk0RugdOPj12VY")
-                    .from(MapUtil.ORIGIN_POINT)
+                    .from(entryPoint)
                     .to(MapUtil.DESTINATION_POINT)
                     .transportMode(TransportMode.DRIVING)
                     .waypoints(selectedEcopointsLatLng)
                     .optimizeWaypoints(true)
                     .execute(this);
         }
+        snackBar.dismiss();
+        isSelectingEntry = false;
+        MapUtil.setMapMarkersVisible(ecopointMarkers, true);
+        MapUtil.removeMapMarkers(entryMarkers);
     }
 
 
@@ -155,8 +177,7 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     }
 
     public void redirectToNativeGoogleMaps(List<Integer> pointOrder){
-        Intent navigation = new Intent(Intent.ACTION_VIEW, Uri
-                .parse(MapUtil.getNativeGoogleMapsURL(MapUtil.ORIGIN_POINT, MapUtil.DESTINATION_POINT, selectedEcopointsLatLng,pointOrder)));
+        Intent navigation = new Intent(Intent.ACTION_VIEW, Uri.parse(MapUtil.getNativeGoogleMapsURL(entryPoint, MapUtil.DESTINATION_POINT, selectedEcopointsLatLng,pointOrder)));
         startActivity(navigation);
     }
 
@@ -171,8 +192,10 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        MapMarkingAsyncTask mapMarkingAsyncTask = new MapMarkingAsyncTask(NucleusMapActivity.this);
-                        mapMarkingAsyncTask.execute();
+                        if(!isSelectingEntry) {
+                            MapMarkingAsyncTask mapMarkingAsyncTask = new MapMarkingAsyncTask(NucleusMapActivity.this);
+                            mapMarkingAsyncTask.execute();
+                        }
                     }
                 });
             }
@@ -184,7 +207,13 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     public void onEcopointsReceived(Map<String, Nucleus> ecopoints) {
         if(ecopoints!=null && !ecopoints.isEmpty()){
             this.ecopoints = ecopoints;
-            MapUtil.drawEcopointMarkers(ecopoints, googleMap);
+            if(!isSelectingEntry){
+                MapUtil.removeMapMarkers(this.ecopointMarkers);
+                this.ecopointMarkers = MapUtil.drawEcopointMarkers(ecopoints, googleMap);
+            }else{
+                this.ecopointMarkers = MapUtil.drawEcopointMarkers(ecopoints, googleMap);
+                MapUtil.setMapMarkersVisible(ecopointMarkers, false);
+            }
         }
     }
 }
