@@ -20,8 +20,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 
 import java.util.ArrayList;
@@ -46,7 +48,10 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     private boolean isRequestingRoute;
     private boolean isSelectingEntry;
     private List<LatLng> selectedEcopointsLatLng = new ArrayList<>();
-    private LatLng entryPoint;
+    private LatLng startPoint;
+    private LatLng stopPoint;
+    private Marker startMarker;
+    private Marker stopMarker;
     private List<Marker> ecopointMarkers;
     private List<Marker> entryMarkers;
     private Snackbar snackBar;
@@ -71,6 +76,8 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
                     fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_local_shipping_white_48dp));
                     MapUtil.removeMapMarkers(entryMarkers);
                     MapUtil.removePolyline(directionPolyline);
+                    MapUtil.removeMarker(startMarker);
+                    MapUtil.removeMarker(stopMarker);
                     MapUtil.setMapMarkersVisible(ecopointMarkers, true);
                     isRequestingRoute = false;
                     isSelectingEntry = false;
@@ -120,11 +127,12 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                if(isSelectingEntry){
+                if (isSelectingEntry) {
                     int id = Integer.parseInt(marker.getTitle());
-                    entryPoint = MapUtil.ENTRY_POINTS[id];
-                    requestDirection(entryPoint);
-                }else{
+                    startPoint = MapUtil.ENTRY_POINTS[id];
+                    stopPoint = MapUtil.DESTINATION_POINT;
+                    requestDirection();
+                } else {
                     String id = marker.getTitle();
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     intent.putExtra("entityId", marker.getTitle());
@@ -136,7 +144,7 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
         });
     }
 
-    public void requestDirection(LatLng entryPoint) {
+    public void requestDirection() {
         if(ecopoints!=null && !ecopoints.isEmpty()){
             selectedEcopointsLatLng = new ArrayList<>();
             for (Map.Entry<String, Nucleus> entry : ecopoints.entrySet()){
@@ -146,8 +154,8 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
                 }
             }
             GoogleDirection.withServerKey("AIzaSyCRGiz73nymFibyZay9tXk0RugdOPj12VY")
-                    .from(entryPoint)
-                    .to(MapUtil.DESTINATION_POINT)
+                    .from(startPoint)
+                    .to(stopPoint)
                     .transportMode(TransportMode.DRIVING)
                     .waypoints(selectedEcopointsLatLng)
                     .optimizeWaypoints(true)
@@ -164,11 +172,18 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     @Override
     public void onDirectionSuccess(Direction direction, String rawBody) {
         if (direction.isOK()) {
+
             List<LatLng> directionPositionList = direction.getRouteList().get(0).getOverviewPolyline().getPointList();
             List<Integer> directionPositionOrder = direction.getRouteList().get(0).getWaypointOrder();
-            directionPolyline = googleMap.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 5, Color.RED));
 
-            redirectToNativeGoogleMaps(directionPositionOrder);
+            List<LatLng> orderedWaypoints = MapUtil.getOrderedPoints(selectedEcopointsLatLng, directionPositionOrder);
+
+            startMarker = googleMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start)).position(startPoint));
+            stopMarker = googleMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop)).position(stopPoint));
+            directionPolyline = googleMap.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 4, Color.BLACK));
+
+
+            redirectToNativeGoogleMaps(orderedWaypoints);
         }
     }
     @Override
@@ -176,8 +191,8 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
 
     }
 
-    public void redirectToNativeGoogleMaps(List<Integer> pointOrder){
-        Intent navigation = new Intent(Intent.ACTION_VIEW, Uri.parse(MapUtil.getNativeGoogleMapsURL(entryPoint, MapUtil.DESTINATION_POINT, selectedEcopointsLatLng,pointOrder)));
+    public void redirectToNativeGoogleMaps( List<LatLng> orderedWaypoints){
+        Intent navigation = new Intent(Intent.ACTION_VIEW, Uri.parse(MapUtil.getNativeGoogleMapsURL(startPoint, stopPoint, orderedWaypoints)));
         startActivity(navigation);
     }
 
@@ -206,14 +221,14 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     @Override
     public void onEcopointsReceived(Map<String, Nucleus> ecopoints) {
         if(ecopoints!=null && !ecopoints.isEmpty()){
-            this.ecopoints = ecopoints;
-            if(!isSelectingEntry){
-                MapUtil.removeMapMarkers(this.ecopointMarkers);
-                this.ecopointMarkers = MapUtil.drawEcopointMarkers(ecopoints, googleMap);
-            }else{
-                this.ecopointMarkers = MapUtil.drawEcopointMarkers(ecopoints, googleMap);
+            MapUtil.removeMapMarkers(this.ecopointMarkers);
+            this.ecopointMarkers = MapUtil.drawEcopointMarkers(this, ecopoints, googleMap);
+            if(isSelectingEntry){
                 MapUtil.setMapMarkersVisible(ecopointMarkers, false);
             }
+            this.ecopoints = ecopoints;
+
         }
     }
+
 }

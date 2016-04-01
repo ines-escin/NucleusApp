@@ -1,7 +1,9 @@
 package io.github.inesescin.nucleus.util;
 
-import android.content.Intent;
-import android.net.Uri;
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.view.View;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -31,30 +33,38 @@ public class MapUtil {
 
     public static final float ZOOM = 15.2f;
 
-    public static List<Marker> drawEcopointMarkers(Map<String, Nucleus> ecopoints, GoogleMap googleMap) {
+    public static List<Marker> drawEcopointMarkers(Activity activity, Map<String, Nucleus> ecopoints, GoogleMap googleMap) {
         List<Marker> markers = new ArrayList<>();
         for (Map.Entry<String, Nucleus> entry : ecopoints.entrySet()){
             Nucleus nucleus = entry.getValue();
-            double level = nucleus.getValue();
-            MarkerOptions markerOptions = new MarkerOptions();
+            int level = (int)nucleus.getValue();
+            int drawableId;
             if (level > 70) {
-                markerOptions.title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_red_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));
+                drawableId = R.drawable.marker_red_ecopoint;
             } else if (level >= 50) {
-                markerOptions.title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_yellow_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));
+                drawableId = R.drawable.marker_orange_ecopoint;
             } else {
-                markerOptions.title(nucleus.getId()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_green_48dp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));
+                drawableId = R.drawable.marker_green_ecopoint;
             }
+            Bitmap markerBmp = DrawableUtil.getMarkerView(activity, level + "", drawableId);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.title(nucleus.getId()).icon(BitmapDescriptorFactory.fromBitmap(markerBmp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));
             Marker marker = googleMap.addMarker(markerOptions);
             markers.add(marker);
         }
         return markers;
     }
 
+
     public static void removeMapMarkers(List<Marker> markers) {
         if(markers==null) return;
         for (Marker marker: markers) {
-            marker.remove();
+            removeMarker(marker);
         }
+    }
+
+    public static void removeMarker(Marker marker){
+        if(marker!=null) marker.remove();
     }
 
     public static void setMapMarkersVisible(List<Marker> markers, boolean visible) {
@@ -74,10 +84,10 @@ public class MapUtil {
         return markers;
     }
 
-    public static String getNativeGoogleMapsURL(LatLng origin, LatLng destination, List<LatLng> waypoints, List<Integer> waypointsOrder){
+    public static String getNativeGoogleMapsURL(LatLng origin, LatLng destination, List<LatLng> orderedWaypoints){
         String URL = "http://maps.google.com/maps?" +
                     "saddr=" + origin.latitude + "," + origin.longitude +
-                    "&daddr=" + waypointsToString(getOrderedPoints(waypoints, waypointsOrder)) +
+                    "&daddr=" + waypointsToString(orderedWaypoints) +
                     "+to:" + destination.latitude + "," + destination.longitude;
         return URL;
     }
@@ -93,7 +103,7 @@ public class MapUtil {
         return null;
     }
 
-    private static List<LatLng> getOrderedPoints(List<LatLng> points, List<Integer> pointOrder){
+    public static List<LatLng> getOrderedPoints(List<LatLng> points, List<Integer> pointOrder){
         List<LatLng> orderedWaypoints = new ArrayList<>();
         for (int i = 0; i < pointOrder.size(); i++) {
             int order = pointOrder.get(i);
@@ -105,4 +115,11 @@ public class MapUtil {
     public static void removePolyline(Polyline directionPolyline) {
         if (directionPolyline != null) directionPolyline.remove();
     }
+    public static void showMarkerInfoWindow(Marker marker){
+        if(marker!=null) marker.showInfoWindow();
+    }
+    public static void setMakerVisible(Marker marker, boolean visible){
+        if(marker!=null) marker.setVisible(visible);
+    }
+
 }
