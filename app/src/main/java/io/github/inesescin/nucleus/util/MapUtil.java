@@ -31,6 +31,10 @@ public class MapUtil {
                                                 new LatLng(-8.055428, -34.956152),
                                                 new LatLng(-8.046545, -34.950556)};
 
+    public static final LatLng[] EXIT_POINTS = { new LatLng(-8.052300, -34.946882),
+                                                new LatLng(-8.055428, -34.956152),
+                                                new LatLng(-8.046545, -34.950556)};
+
     public static final float ZOOM = 15.2f;
 
     public static List<Marker> drawEcopointMarkers(Activity activity, Map<String, Nucleus> ecopoints, GoogleMap googleMap) {
@@ -78,7 +82,17 @@ public class MapUtil {
         List<Marker> markers = new ArrayList<>();
         for (int i = 0; i < ENTRY_POINTS.length; i++) {
             LatLng latLng = ENTRY_POINTS[i];
-            Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng).title(i+""));
+            Marker marker = googleMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start)).position(latLng).title(i + ""));
+            markers.add(marker);
+        }
+        return markers;
+    }
+
+    public static List<Marker> drawExitMarkers(GoogleMap googleMap){
+        List<Marker> markers = new ArrayList<>();
+        for (int i = 0; i < EXIT_POINTS.length; i++) {
+            LatLng latLng = EXIT_POINTS[i];
+            Marker marker = googleMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop)).position(latLng).title(i + ""));
             markers.add(marker);
         }
         return markers;
