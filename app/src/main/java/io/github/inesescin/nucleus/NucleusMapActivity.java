@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.akexorcist.googledirection.DirectionCallback;
@@ -16,6 +14,8 @@ import com.akexorcist.googledirection.GoogleDirection;
 import com.akexorcist.googledirection.constant.TransportMode;
 import com.akexorcist.googledirection.model.Direction;
 import com.akexorcist.googledirection.util.DirectionConverter;
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -56,7 +56,8 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     private List<Marker> ecopointMarkers;
     private List<Marker> entryMarkers;
     private List<Marker> exitMarkers;
-    private Snackbar snackBar;
+    private FloatingActionButton fabDirections;
+    private List<LatLng> orderedWaypoints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,38 +68,44 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
     }
 
     private void setActivityEnvironment() {
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fabDirections = (FloatingActionButton) findViewById(R.id.fab_directions);
+        fabDirections.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                if (googleMap == null || ecopoints == null) return;
+            public void onClick(View v) {
+                redirectToNativeGoogleMaps();
+            }
+        });
 
+        final FloatingActionMenu fab = (FloatingActionMenu) findViewById(R.id.fab);
+        fab.setOnMenuToggleListener(new FloatingActionMenu.OnMenuToggleListener() {
+            @Override
+            public void onMenuToggle(boolean opened) {
+                fab.getMenuIconView().setImageResource(opened ? com.github.clans.fab.R.drawable.fab_add : R.drawable.ic_local_shipping_white_24dp);
+                if (googleMap == null || ecopoints == null) return;
                 if (isRequestingRoute) {
                     //Here we cancel and let it all default
-                    fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_local_shipping_white_48dp));
                     MapUtil.removeMapMarkers(entryMarkers);
                     MapUtil.removeMapMarkers(exitMarkers);
                     MapUtil.removePolyline(directionPolyline);
                     MapUtil.removeMarker(startMarker);
                     MapUtil.removeMarker(stopMarker);
                     MapUtil.setMapMarkersVisible(ecopointMarkers, true);
+                    fabDirections.setVisibility(View.GONE);
                     isRequestingRoute = false;
                     isSelectingEntry = false;
                     isSelectingExit = false;
-                    snackBar.dismiss();
                 } else {
                     isRequestingRoute = true;
                     //Let the user choose the entry point
-                    fab.setImageDrawable(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_close_white_48dp));
                     MapUtil.setMapMarkersVisible(ecopointMarkers, false);
                     entryMarkers = MapUtil.drawEntryMarkers(googleMap);
                     isSelectingEntry = true;
-                    snackBar = Snackbar.make(view, "Escolha por onde entrar na UFPE", Snackbar.LENGTH_INDEFINITE);
-                    snackBar.show();
+                    Snackbar.make(findViewById(R.id.coordinator_layout), "Escolha por onde entrar na UFPE", Snackbar.LENGTH_LONG).show();
                 }
-
             }
         });
+
+
     }
 
     @Override
@@ -136,11 +143,9 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
                     startPoint = MapUtil.ENTRY_POINTS[id];
                     MapUtil.removeMapMarkers(entryMarkers);
                     isSelectingEntry = false;
-
                     exitMarkers = MapUtil.drawExitMarkers(googleMap);
                     isSelectingExit = true;
-                    snackBar = Snackbar.make(findViewById(R.id.coordinator_layout), "Escolha por onde sair na UFPE", Snackbar.LENGTH_INDEFINITE);
-                    snackBar.show();
+                    Snackbar.make(findViewById(R.id.coordinator_layout), "Escolha por onde sair na UFPE", Snackbar.LENGTH_LONG).show();
                 }else if(isSelectingExit){
                     int id = Integer.parseInt(marker.getTitle());
                     stopPoint = MapUtil.EXIT_POINTS[id];
@@ -148,7 +153,6 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
                     isSelectingExit = false;
                     requestDirection();
                     MapUtil.setMapMarkersVisible(ecopointMarkers, true);
-                    snackBar.dismiss();
                 }else {
                     String id = marker.getTitle();
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -189,14 +193,13 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
             List<LatLng> directionPositionList = direction.getRouteList().get(0).getOverviewPolyline().getPointList();
             List<Integer> directionPositionOrder = direction.getRouteList().get(0).getWaypointOrder();
 
-            List<LatLng> orderedWaypoints = MapUtil.getOrderedPoints(selectedEcopointsLatLng, directionPositionOrder);
+            orderedWaypoints = MapUtil.getOrderedPoints(selectedEcopointsLatLng, directionPositionOrder);
 
             startMarker = googleMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start)).position(startPoint));
             stopMarker = googleMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop)).position(stopPoint));
             directionPolyline = googleMap.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 4, Color.BLACK));
 
-
-            redirectToNativeGoogleMaps(orderedWaypoints);
+            fabDirections.setVisibility(View.VISIBLE);
         }
     }
     @Override
@@ -204,7 +207,7 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
 
     }
 
-    public void redirectToNativeGoogleMaps( List<LatLng> orderedWaypoints){
+    public void redirectToNativeGoogleMaps(){
         Intent navigation = new Intent(Intent.ACTION_VIEW, Uri.parse(MapUtil.getNativeGoogleMapsURL(startPoint, stopPoint, orderedWaypoints)));
         startActivity(navigation);
     }
