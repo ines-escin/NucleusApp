@@ -65,7 +65,7 @@ public class FiwareConnection {
         return value;
     }
 
-    private String doGetRequest(String url) throws IOException
+    private synchronized String doGetRequest(String url) throws IOException
     {
         Request request = new Request.Builder()
                 .url(url)
@@ -76,29 +76,28 @@ public class FiwareConnection {
         Response response;
         response = client.newCall(request).execute();
 
-        String responseString = response.body().string();
+        String stringResponse = response.body().string();
         response.body().close();
-        return responseString;
+
+        return stringResponse;
     }
 
-    private String doPostRequest(String url, String json) throws IOException
+    private synchronized String doPostRequest(String url, String json) throws IOException
     {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Accept", "application/json")
+                .addHeader("Accept","application/json")
                 .addHeader("Connection", "close")
                 .post(body)
                 .build();
 
         Response response;
-
         response = client.newCall(request).execute();
-
-
-        String responseString = response.body().string();
+        String stringResponse = response.body().string();
         response.body().close();
-        return responseString;
+
+        return stringResponse;
     }
 
 
