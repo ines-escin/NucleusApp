@@ -65,46 +65,39 @@ public class FiwareConnection {
         return value;
     }
 
-    private String doGetRequest(String url) throws IOException
+    private synchronized String doGetRequest(String url) throws IOException
     {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Accept", "application/json")
+                .addHeader("Connection", "close")
                 .build();
 
         Response response;
-        int requestAttempts = 0;
+        response = client.newCall(request).execute();
 
-        do
-        {
-            response = client.newCall(request).execute();
-            requestAttempts++;
-        }
-        while(response.code() != 200 || requestAttempts < 5);
+        String stringResponse = response.body().string();
+        response.body().close();
 
-        return response.body().string();
+        return stringResponse;
     }
 
-    private String doPostRequest(String url, String json) throws IOException
+    private synchronized String doPostRequest(String url, String json) throws IOException
     {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Accept","application/json")
+                .addHeader("Connection", "close")
                 .post(body)
                 .build();
 
         Response response;
-        int requestAttempts = 0;
+        response = client.newCall(request).execute();
+        String stringResponse = response.body().string();
+        response.body().close();
 
-        do
-        {
-            response = client.newCall(request).execute();
-            requestAttempts++;
-        }
-        while(response.code() != 200 || requestAttempts < 5);
-
-        return response.body().string();
+        return stringResponse;
     }
 
 
