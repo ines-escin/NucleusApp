@@ -37,4 +37,13 @@
     <!-- Backward-compatible version of ?android:attr/buttonBarButtonStyle -->
     <style name="ButtonBarButton" />
 
+    <style name="FloatingMenuButtons">
+        <item name="fab_colorNormal">#00BCD4</item>
+        <item name="fab_colorPressed">#0097a7</item>
+        <item name="fab_colorRipple">#00838f</item>
+        <item name = "menu_colorNormal">@color/colorAccent</item>
+        <item name = "menu_colorPressed">#0097a7</item>
+        <item name = "menu_colorRipple">#00838f</item>
+    </style>
+
 </resources>

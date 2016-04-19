@@ -41,7 +41,8 @@ public class Route {
     Fare fare;
     @SerializedName("warnings")
     List<String> warningList;
-    // waypoint_order
+    @SerializedName("waypoint_order")
+    List<Integer> waypointOrder;
 
     public Bound getBound() {
         return bound;
@@ -69,5 +70,9 @@ public class Route {
 
     public List<String> getWarningList() {
         return warningList;
+    }
+
+    public List<Integer> getWaypointOrder() {
+        return waypointOrder;
     }
 }
