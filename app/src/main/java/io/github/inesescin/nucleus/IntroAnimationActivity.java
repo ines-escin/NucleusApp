@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.github.inesescin.nucleus.models.NucleusRiomar;
+
 public class IntroAnimationActivity extends AppCompatActivity {
 
     @Override

@@ -12,6 +12,7 @@ import java.util.Map;
 import io.github.inesescin.nucleus.callback.EcopointsCallback;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
 import io.github.inesescin.nucleus.models.Nucleus;
+import io.github.inesescin.nucleus.models.NucleusRiomar;
 import io.github.inesescin.nucleus.util.Constants;
 
 /**
@@ -46,14 +47,31 @@ public class MapMarkingAsyncTask extends AsyncTask<Void, Void,  Map<String, Nucl
         JSONObject response = new JSONObject(stringResponse);
         JSONArray contextResponse = response.getJSONArray("contextResponses");
         for (int i = 0; i < contextResponse.length(); i++) {
-            Nucleus nucleus = new Nucleus();
+
             JSONObject currentEntityResponse = contextResponse.getJSONObject(i);
             JSONObject contextElement = currentEntityResponse.getJSONObject("contextElement");
-            nucleus.setId(contextElement.getString("id"));
-            JSONArray attributes = contextElement.getJSONArray("attributes");
-            nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
-            nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
-            ecopoints.put(nucleus.getId(), nucleus);
+
+            String id = contextElement.getString("id");
+
+            if(!id.contains("NucleusRiomar"))
+            {
+                Nucleus nucleus = new Nucleus();
+                nucleus.setId(id);
+                JSONArray attributes = contextElement.getJSONArray("attributes");
+                nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
+                nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
+                ecopoints.put(nucleus.getId(), nucleus);
+            }
+            else
+            {
+                NucleusRiomar nucleus = new NucleusRiomar();
+                nucleus.setId(id);
+                JSONArray attributes = contextElement.getJSONArray("attributes");
+                nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
+                nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
+                nucleus.setQuery(attributes.getJSONObject(2).getString("value"));
+                ecopoints.put(nucleus.getId(), nucleus);
+            }
         }
         return ecopoints;
     }
