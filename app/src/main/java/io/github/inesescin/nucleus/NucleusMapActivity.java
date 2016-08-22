@@ -226,7 +226,7 @@ public class NucleusMapActivity extends FragmentActivity implements DirectionCal
             }
             Collections.reverse(arrayList);
             Intent navigation = new Intent(Intent.ACTION_VIEW, Uri.parse(
-                    MapUtil.getNativeGoogleMapsURL("-8.085398, -34.894203",
+                    MapUtil.getNativeGoogleMapsURL("-8.055335, -34.951603",
                             "",
                             arrayList)));
             startActivity(navigation);

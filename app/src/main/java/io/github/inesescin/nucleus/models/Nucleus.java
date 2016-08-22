@@ -8,6 +8,7 @@ public class Nucleus {
     private String id;
     private double value;
     private String coordinates;
+    private boolean status;
 
     public Nucleus(String id, double value)
     {
@@ -32,6 +33,23 @@ public class Nucleus {
     public double getValue()
     {
         return value;
+    }
+
+    public boolean getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(String status)
+    {
+        if(status.equals("broken"))
+        {
+            this.status = true;
+        }
+        else
+        {
+            this.status = false;
+        }
     }
 
     public void setId(String id)
