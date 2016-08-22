@@ -5,5 +5,5 @@ package io.github.inesescin.nucleus.util;
  */
 public class Constants {
     public static final long ECOPOINTS_REQUEST_SCHEDULE_TIME = 10000;
-    public static String FIWARE_ADDRESS = "130.206.119.206:1026";
+    public static String FIWARE_ADDRESS = "IP+PORT";
 }
