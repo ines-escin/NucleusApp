@@ -55,13 +55,22 @@ public class MapUtil {
             Nucleus nucleus = entry.getValue();
             int level = (int)nucleus.getValue();
             int drawableId;
-            if (level > 70) {
-                drawableId = R.drawable.marker_red_ecopoint;
-            } else if (level >= 50) {
-                drawableId = R.drawable.marker_orange_ecopoint;
-            } else {
-                drawableId = R.drawable.marker_green_ecopoint;
+            boolean status = nucleus.getStatus();
+
+            if(status)
+            {
+                drawableId = R.drawable.marker_alert;
             }
+            else {
+                if (level > 70) {
+                    drawableId = R.drawable.marker_red_ecopoint;
+                } else if (level >= 50) {
+                    drawableId = R.drawable.marker_orange_ecopoint;
+                } else {
+                    drawableId = R.drawable.marker_green_ecopoint;
+                }
+            }
+
             Bitmap markerBmp = DrawableUtil.getMarkerView(activity, level + "", drawableId);
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.title(nucleus.getId()).icon(BitmapDescriptorFactory.fromBitmap(markerBmp)).position(new LatLng(nucleus.getLatitude(), nucleus.getLongitude()));

@@ -48,36 +48,22 @@ public class MapMarkingAsyncTask extends AsyncTask<Void, Void,  Map<String, Nucl
         JSONArray contextResponse = response.getJSONArray("contextResponses");
         for (int i = 0; i < contextResponse.length(); i++) {
 
+            Nucleus nucleus = new Nucleus();
             JSONObject currentEntityResponse = contextResponse.getJSONObject(i);
             JSONObject contextElement = currentEntityResponse.getJSONObject("contextElement");
+            nucleus.setId(contextElement.getString("id"));
+            JSONArray attributes = contextElement.getJSONArray("attributes");
+            nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
+            nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
+            nucleus.setStatus(attributes.getJSONObject(2).getString("value")); //status
+            ecopoints.put(nucleus.getId(), nucleus);
 
-            String id = contextElement.getString("id");
-
-            if(!id.contains("NucleusRiomar"))
-            {
-                Nucleus nucleus = new Nucleus();
-                nucleus.setId(id);
-                JSONArray attributes = contextElement.getJSONArray("attributes");
-                nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
-                nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
-                ecopoints.put(nucleus.getId(), nucleus);
-            }
-            else
-            {
-                NucleusRiomar nucleus = new NucleusRiomar();
-                nucleus.setId(id);
-                JSONArray attributes = contextElement.getJSONArray("attributes");
-                nucleus.setCoordinates(attributes.getJSONObject(0).getString("value"));
-                nucleus.setValue(Double.parseDouble(attributes.getJSONObject(1).getString("value")));
-                nucleus.setQuery(attributes.getJSONObject(2).getString("value"));
-                ecopoints.put(nucleus.getId(), nucleus);
-            }
         }
         return ecopoints;
     }
 
     @Override
-    protected void onPostExecute(Map<String, Nucleus>  ecopoints) {
+    protected void onPostExecute(Map<String, Nucleus> ecopoints) {
         super.onPostExecute(ecopoints);
         if(callback!=null) {
             callback.onEcopointsReceived(ecopoints);
