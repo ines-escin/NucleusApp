@@ -16,6 +16,7 @@ import io.github.inesescin.nucleus.connection.FiwareConnection;
 
 import io.github.inesescin.nucleus.models.Nucleus;
 import io.github.inesescin.nucleus.util.Constants;
+import io.github.inesescin.nucleus.util.NetworkUtil;
 import pl.pawelkleczkowski.customgauge.CustomGauge;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         Bundle extras = getIntent().getExtras();

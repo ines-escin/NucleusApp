@@ -23,18 +23,6 @@ public class Nucleus {
         this.coordinates = coordinates;
     }
 
-    public Nucleus(){}
-
-    public void setCoordinates(String coordinates)
-    {
-        this.coordinates = coordinates;
-    }
-
-    public double getValue()
-    {
-        return value;
-    }
-
     public boolean getStatus()
     {
         return status;
@@ -52,6 +40,19 @@ public class Nucleus {
         }
     }
 
+
+    public Nucleus(){}
+
+    public void setCoordinates(String coordinates)
+    {
+        this.coordinates = coordinates;
+    }
+
+    public double getValue()
+    {
+        return value;
+    }
+
     public void setId(String id)
     {
         this.id = id;
@@ -66,6 +67,8 @@ public class Nucleus {
     {
         this.value = value;
     }
+
+
 
     public double getLatitude()
     {

@@ -12,7 +12,6 @@ import java.util.Map;
 import io.github.inesescin.nucleus.callback.EcopointsCallback;
 import io.github.inesescin.nucleus.connection.FiwareConnection;
 import io.github.inesescin.nucleus.models.Nucleus;
-import io.github.inesescin.nucleus.models.NucleusRiomar;
 import io.github.inesescin.nucleus.util.Constants;
 
 /**

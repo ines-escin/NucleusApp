@@ -24,30 +24,18 @@ import io.github.inesescin.nucleus.models.Nucleus;
  */
 public class MapUtil {
     
-//    public static final LatLng CENTER_POINT = new LatLng(-8.0524376, -34.9511914);
-//    public static final LatLng DESTINATION_POINT = new LatLng(-8.052276, -34.946933);
-//
-//    public static final LatLng[] ENTRY_POINTS = { new LatLng(-8.051995, -34.946845),
-//                                                new LatLng(-8.055428, -34.956152),
-//                                                new LatLng(-8.046545, -34.950556)};
-//
-//    public static final LatLng[] EXIT_POINTS = { new LatLng(-8.052300, -34.946882),
-//                                                new LatLng(-8.055428, -34.956152),
-//                                                new LatLng(-8.046545, -34.950556)};
-
-    //for Riomar demo
-    public static final LatLng CENTER_POINT = new LatLng(-8.086040, -34.894164);
+    public static final LatLng CENTER_POINT = new LatLng(-8.0524376, -34.9511914);
     public static final LatLng DESTINATION_POINT = new LatLng(-8.052276, -34.946933);
 
     public static final LatLng[] ENTRY_POINTS = { new LatLng(-8.051995, -34.946845),
-            new LatLng(-8.055428, -34.956152),
-            new LatLng(-8.046545, -34.950556)};
+                                                new LatLng(-8.055428, -34.956152),
+                                                new LatLng(-8.046545, -34.950556)};
 
     public static final LatLng[] EXIT_POINTS = { new LatLng(-8.052300, -34.946882),
-            new LatLng(-8.055428, -34.956152),
-            new LatLng(-8.046545, -34.950556)};
+                                                new LatLng(-8.055428, -34.956152),
+                                                new LatLng(-8.046545, -34.950556)};
 
-    public static final float ZOOM = 19;
+    public static final float ZOOM = 15.2f;
 
     public static List<Marker> drawEcopointMarkers(Activity activity, Map<String, Nucleus> ecopoints, GoogleMap googleMap) {
         List<Marker> markers = new ArrayList<>();
@@ -127,32 +115,11 @@ public class MapUtil {
         return URL;
     }
 
-    public static String getNativeGoogleMapsURL(String origin, String destination, List<String> waypoints){
-        String URL = "http://maps.google.com/maps?" +
-                "saddr=" + origin +
-                "&daddr=" + waypointsToUrl(waypoints) +
-                "+to:" + destination +
-                "&dirflg=w"+
-                "&zoom=18";
-        return URL;
-    }
-
     private static String waypointsToString(List<LatLng> waypoints){
         if (waypoints != null && !waypoints.isEmpty()) {
             String string = waypoints.get(0).latitude + "," + waypoints.get(0).longitude;
             for (int i = 1; i < waypoints.size(); i++) {
                 string += "+to:" + waypoints.get(i).latitude + "," + waypoints.get(i).longitude;
-            }
-            return string;
-        }
-        return null;
-    }
-
-    private static String waypointsToUrl(List<String> waypoints){
-        if (waypoints != null && !waypoints.isEmpty()) {
-            String string = waypoints.get(0);
-            for (int i = 1; i < waypoints.size(); i++) {
-                string += "+to:" + waypoints.get(i);
             }
             return string;
         }
